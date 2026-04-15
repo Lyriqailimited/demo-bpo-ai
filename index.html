@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPO AI — Proposal Workspace</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ['"Inter Tight"', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+:root {
+  --page-bg: #000000;
+  --page-bg-secondary: #0a0a0a;
+  --page-surface: rgba(15,15,15,0.82);
+  --page-surface-strong: #09090b;
+  --page-text: #ffffff;
+  --page-muted: #bfbfbf;
+  --page-primary: #6EC1E4;
+  --page-primary-soft: rgba(110,193,228,0.18);
+  --page-accent: #5da4c1;
+  --page-border: rgba(255,255,255,0.08);
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--page-text);
+  background: radial-gradient(circle at top, color-mix(in srgb, var(--page-primary) 18%, transparent), transparent 30%), linear-gradient(180deg, #000, #0a0a0a);
+  min-height: 100vh;
+  margin: 0;
+}
+.font-display { font-family: 'Inter Tight', sans-serif; }
+.text-muted { color: var(--page-muted); }
+
+.section-shell { margin-left: auto; margin-right: auto; width: 100%; max-width: 80rem; padding-left: 1rem; padding-right: 1rem; }
+@media (min-width: 640px) { .section-shell { padding-left: 1.5rem; padding-right: 1.5rem; } }
+@media (min-width: 1024px) { .section-shell { padding-left: 2rem; padding-right: 2rem; } }
+
+.panel {
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(255,255,255,0.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 24px 80px rgba(5,10,25,0.45);
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--page-accent);
+}
+
+.section-copy { font-size: 1rem; line-height: 1.75; color: var(--page-muted); }
+@media (min-width: 640px) { .section-copy { font-size: 1.125rem; } }
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 300ms cubic-bezier(0.16,1,0.3,1);
+  text-decoration: none;
+}
+.cta-button-primary {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--page-primary), var(--page-accent));
+}
+.cta-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 48px rgba(110,193,228,0.24);
+}
+.cta-button-secondary {
+  color: #fff;
+  border-color: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+.cta-button-secondary:hover { background: rgba(255,255,255,0.1); }
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 120px 120px;
+  -webkit-mask-image: radial-gradient(circle at center, black, transparent 78%);
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+@keyframes blobPulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, 0) scale(0.96); }
+  50% { opacity: 0.85; transform: translate(-50%, 0) scale(1.04); }
+}
+@keyframes blobDriftLeft {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 0.7; transform: translateX(20px); }
+}
+@keyframes blobDriftBottom {
+  0%, 100% { opacity: 0.35; transform: translateY(0); }
+  50% { opacity: 0.65; transform: translateY(-20px); }
+}
+
+.blob-top {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 40rem; height: 40rem;
+  left: 50%; top: -18rem;
+  filter: blur(60px);
+  background: radial-gradient(circle, rgba(110,193,228,0.28), transparent 70%);
+  animation: blobPulse 12s ease-in-out infinite;
+}
+.blob-left {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 22rem; height: 22rem;
+  left: -6rem; top: 72rem;
+  filter: blur(60px);
+  background: radial-gradient(circle, rgba(93,164,193,0.18), transparent 70%);
+  animation: blobDriftLeft 10s ease-in-out infinite;
+}
+.blob-right {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 24rem; height: 24rem;
+  bottom: -8rem; right: -4rem;
+  filter: blur(60px);
+  background: radial-gradient(circle, rgba(110,193,228,0.16), transparent 70%);
+  animation: blobDriftBottom 14s ease-in-out infinite;
+}
+
+details summary::-webkit-details-marker { display: none; }
+details summary::marker { display: none; }
+</style>
+</head>
+<body class="antialiased">
+
+<div class="grid-overlay"></div>
+<div class="blob-top"></div>
+<div class="blob-left"></div>
+<div class="blob-right"></div>
+
+<!-- 1. STICKY HEADER -->
+<header class="sticky top-0 z-40" style="position: sticky;">
+  <div class="section-shell pt-4">
+    <div class="panel px-4 py-4 sm:px-6">
+      <div class="flex items-start justify-between gap-4">
+        <a href="#hero" class="flex items-center gap-3 no-underline">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-bold text-white">BA</div>
+          <div>
+            <span class="font-display text-lg font-semibold text-white">LYRIQ</span>
+            <span class="hidden sm:block text-sm text-muted">AI infrastructure for BPOs and enterprises.</span>
+          </div>
+        </a>
+        <div class="hidden md:flex items-center">
+          <div class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm flex items-center gap-2">
+            <span class="rounded-full px-2 py-1 font-semibold text-sm" style="background: var(--page-primary-soft); color: var(--page-primary);">AI Infrastructure</span>
+            <span class="text-muted">Enterprise AI and operational intelligence designed to run inside BPO delivery.</span>
+          </div>
+        </div>
+        <a href="#cta" class="cta-button-secondary md:hidden text-xs">Request a demo</a>
+      </div>
+      <div class="grid gap-3 md:hidden mt-3">
+        <div class="grid grid-cols-2 gap-2 rounded-[24px] border border-white/10 bg-black/10 p-2">
+          <a href="#hero" class="flex items-center justify-center min-h-[2.75rem] rounded-full border border-white/10 bg-white/[0.04] text-sm text-muted hover:text-white transition no-underline">Hero</a>
+          <a href="#bento" class="flex items-center justify-center min-h-[2.75rem] rounded-full border border-white/10 bg-white/[0.04] text-sm text-muted hover:text-white transition no-underline">Agent</a>
+        </div>
+        <div class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm flex items-center gap-2">
+          <span class="rounded-full px-2 py-1 font-semibold text-xs" style="background: var(--page-primary-soft); color: var(--page-primary);">AI Infrastructure</span>
+          <span class="text-muted text-xs">Enterprise AI and operational intelligence designed to run inside BPO delivery.</span>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-2 mt-3">
+        <nav class="rounded-full border border-white/10 bg-black/10 px-5 py-3 flex items-center gap-6">
+          <a href="#hero" class="text-sm text-muted hover:text-white transition no-underline">Hero</a>
+          <a href="#bento" class="text-sm text-muted hover:text-white transition no-underline">Platform</a>
+          <a href="#process" class="text-sm text-muted hover:text-white transition no-underline">Playbook</a>
+          <a href="#pricing" class="text-sm text-muted hover:text-white transition no-underline">Pricing</a>
+          <a href="#faq" class="text-sm text-muted hover:text-white transition no-underline">FAQ</a>
+        </nav>
+        <a href="#cta" class="cta-button-secondary ml-2">Request a demo</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 2. HERO -->
+<section id="hero" class="section-shell pb-16 pt-8 sm:pb-20 relative z-10">
+  <div class="panel rounded-[36px] p-4 sm:p-6 lg:p-8">
+    <div class="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.03] px-6 py-10 text-center sm:px-10" data-aos="fade-up">
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.14), transparent 58%);"></div>
+      <div class="relative">
+        <span class="section-eyebrow">Proposal workspace</span>
+        <h1 class="mt-4 text-3xl sm:text-5xl font-semibold tracking-tight text-white font-display">BPO AI Proposal</h1>
+        <p class="mx-auto mt-4 max-w-3xl text-sm sm:text-base leading-7 text-muted">Use this hero as a proposal surface: a branded banner up top, a live document preview from a Cloudinary URL on the left, and separate sender and recipient company panels on the right.</p>
+        <div class="mt-7 flex flex-wrap justify-center gap-3">
+          <a href="#proposal-doc" class="cta-button cta-button-primary">Open proposal <i class="fa-solid fa-arrow-right ml-2"></i></a>
+          <a href="https://bpoai.com" target="_blank" rel="noopener" class="cta-button cta-button-secondary">Visit LYRIQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2.45fr)_320px]">
+      <article id="proposal-doc" class="overflow-hidden rounded-[30px] border border-white/10" style="background: var(--page-surface);" data-aos="fade-up">
+        <div class="p-5 sm:p-6">
+          <span class="section-eyebrow text-xs">Proposal</span>
+          <h2 class="mt-4 text-xl sm:text-2xl font-semibold text-white font-display">Tailored proposal review surface</h2>
+          <p class="mt-3 text-sm leading-7 text-muted">Live-rendered proposal document embedded directly in the workspace for seamless buyer review.</p>
+          <a href="https://res.cloudinary.com/djeflt2qo/raw/upload/v1776235512/proposal_docs/hunter-enterprises_1776235510.pdf" target="_blank" rel="noopener" class="cta-button cta-button-secondary mt-4 text-xs">Open source document <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i></a>
+        </div>
+        <div class="min-h-[620px] bg-black/20">
+          <iframe class="h-[620px] w-full bg-white" src="https://res.cloudinary.com/djeflt2qo/raw/upload/v1776235512/proposal_docs/hunter-enterprises_1776235510.pdf" title="Proposal PDF"></iframe>
+        </div>
+        <div class="border-t border-white/10 px-5 py-4 flex items-center gap-3 text-sm text-muted">
+          <i class="fa-solid fa-file-code" style="color: var(--page-primary);"></i>
+          <span>PDF Document Content</span>
+        </div>
+      </article>
+      <aside class="flex flex-col gap-5 rounded-[30px] border border-white/10 p-5 sm:p-6" style="background: var(--page-surface);" data-aos="fade-up" data-aos-delay="100">
+        <span class="section-eyebrow text-xs">Receiving company</span>
+        <div class="flex items-center justify-center h-20 rounded-[20px] border border-white/10 bg-white/[0.03]">
+          <div class="flex h-14 w-14 items-center justify-center rounded-full text-2xl font-bold text-white" style="background: var(--page-primary-soft); color: var(--page-primary);">BA</div>
+        </div>
+        <h3 class="text-2xl font-semibold text-white font-display">BPO AI</h3>
+        <ul class="space-y-3 text-sm text-muted list-none p-0 m-0">
+          <li class="flex items-center gap-3"><i class="fa-solid fa-globe" style="color: var(--page-primary);"></i><a href="https://bpoai.com" target="_blank" rel="noopener" class="text-muted hover:text-white transition no-underline">bpoai.com</a></li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-building" style="color: var(--page-primary);"></i><span>Insurance</span></li>
+          <li class="flex items-center gap-3"><i class="fa-solid fa-user" style="color: var(--page-primary);"></i><span>BPO AI Team — Operations lead</span></li>
+        </ul>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3 rounded-[18px] border border-white/10 bg-white/[0.02] px-4 py-4 text-white/90 text-sm">
+            <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" style="background: var(--page-primary);"></span>
+            8 purpose-built voice agents for every BPO use case
+          </div>
+          <div class="flex items-start gap-3 rounded-[18px] border border-white/10 bg-white/[0.02] px-4 py-4 text-white/90 text-sm">
+            <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" style="background: var(--page-primary);"></span>
+            Replaces 20+ human agents with 24/7 AI coverage
+          </div>
+          <div class="flex items-start gap-3 rounded-[18px] border border-white/10 bg-white/[0.02] px-4 py-4 text-white/90 text-sm">
+            <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" style="background: var(--page-primary);"></span>
+            Go-live in 14-21 days with enterprise-grade security
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- 3. METRICS -->
+<section class="section-shell py-2 relative z-10">
+  <div class="panel grid gap-4 px-5 py-5 sm:grid-cols-2 lg:grid-cols-4" data-aos="fade-up">
+    <div class="rounded-[22px] border border-white/10 bg-black/10 p-5">
+      <div class="text-3xl font-semibold text-white">98%</div>
+      <div class="mt-3 text-sm text-muted">Proposals landing with buyer sign-off on the first review</div>
+    </div>
+    <div class="rounded-[22px] border border-white/10 bg-black/10 p-5">
+      <div class="text-3xl font-semibold text-white">&lt; 5 min</div>
+      <div class="mt-3 text-sm text-muted">From RFP intake to tailored proposal delivered to prospect</div>
+    </div>
+    <div class="rounded-[22px] border border-white/10 bg-black/10 p-5">
+      <div class="text-3xl font-semibold text-white">42%</div>
+      <div class="mt-3 text-sm text-muted">Expansion revenue generated by operational AI playbooks</div>
+    </div>
+    <div class="rounded-[22px] border border-white/10 bg-black/10 p-5">
+      <div class="text-3xl font-semibold text-white">24/7</div>
+      <div class="mt-3 text-sm text-muted">Live voice agent coverage across every inbound channel</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. BENTO FEATURES -->
+<section id="bento" class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="text-center" data-aos="fade-up">
+    <span class="section-eyebrow">Platform</span>
+    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-white font-display">Everything inside a proposal workspace</h2>
+    <p class="mx-auto mt-4 max-w-2xl section-copy">A composable surface that bundles proposals, voice agents, and buyer intelligence into one link.</p>
+  </div>
+  <div class="mt-10 grid gap-4 lg:grid-cols-3">
+    <article class="panel relative overflow-hidden p-6" data-aos="fade-up" data-aos-delay="0">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-file-code h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Schema</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">JSON-driven content model</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Separate brand shell, recipient data, and widget copy so every proposal deploys in minutes.</p>
+    </article>
+    <article class="panel relative overflow-hidden p-6 lg:col-span-2" data-aos="fade-up" data-aos-delay="70">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-grip h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Bento</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">Composable landing sections</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Mix hero, metrics, bento, process, pricing, FAQ and CTA sections to fit any narrative.</p>
+    </article>
+    <article class="panel relative overflow-hidden p-6" data-aos="fade-up" data-aos-delay="140">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-wand-magic-sparkles h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">AI</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">Embedded voice agent</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Pipecat widget auto-opens to demo live conversation flows for buyers.</p>
+    </article>
+    <article class="panel relative overflow-hidden p-6" data-aos="fade-up" data-aos-delay="210">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-microphone h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Voice</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">Real-time transcripts</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Captures intent and objections during demo calls with full context to operators.</p>
+    </article>
+    <article class="panel relative overflow-hidden p-6 lg:min-h-[24rem]" data-aos="fade-up" data-aos-delay="280">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-rocket h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Speed</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">Ship in one afternoon</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Drop in the JSON, swap the Cloudinary PDF, deploy — no build pipeline drama.</p>
+    </article>
+    <article class="panel relative overflow-hidden p-6" data-aos="fade-up" data-aos-delay="350">
+      <div class="absolute inset-x-0 top-0 h-32 pointer-events-none" style="background: radial-gradient(circle at top, rgba(110,193,228,0.10), transparent 68%);"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10"><i class="fa-solid fa-shield-halved h-5 w-5" style="color: var(--page-primary);"></i></div>
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Trust</span>
+      </div>
+      <h3 class="relative mt-10 text-2xl font-semibold text-white">Enterprise-grade controls</h3>
+      <p class="relative mt-4 text-sm leading-7 text-muted">Scoped access, audit trails, and compliance-safe document hosting baked in.</p>
+    </article>
+  </div>
+</section>
+
+<!-- 5. PROCESS -->
+<section id="process" class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="text-center" data-aos="fade-up">
+    <span class="section-eyebrow">Playbook</span>
+    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-white font-display">From intake to signed engagement</h2>
+    <p class="mx-auto mt-4 max-w-2xl section-copy">Four repeatable steps that turn a cold lead into an instrumented account.</p>
+  </div>
+  <div class="mt-10 grid gap-4 lg:grid-cols-2">
+    <article class="panel p-6" data-aos="fade-right" data-aos-delay="0">
+      <div class="flex items-center gap-3">
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Step 1</span>
+        <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+      </div>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Capture intent</h3>
+      <p class="text-muted mt-4 text-sm leading-7">Ingest the target company brief, scrape their site, and extract decision-maker context before the first call.</p>
+      <div class="mt-5 rounded-[20px] border border-white/10 bg-black/10 px-4 py-4 text-white/90 text-sm">Outcome: a calibrated target-company brief.</div>
+    </article>
+    <article class="panel p-6" data-aos="fade-left" data-aos-delay="80">
+      <div class="flex items-center gap-3">
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Step 2</span>
+        <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+      </div>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Assemble the proposal</h3>
+      <p class="text-muted mt-4 text-sm leading-7">Generate a branded proposal PDF, host it on Cloudinary, and wire it into the workspace template.</p>
+      <div class="mt-5 rounded-[20px] border border-white/10 bg-black/10 px-4 py-4 text-white/90 text-sm">Outcome: branded proposal PDF hosted on Cloudinary.</div>
+    </article>
+    <article class="panel p-6" data-aos="fade-right" data-aos-delay="160">
+      <div class="flex items-center gap-3">
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Step 3</span>
+        <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+      </div>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Run the walkthrough</h3>
+      <p class="text-muted mt-4 text-sm leading-7">Share the workspace link, let the voice agent guide the buyer through the proposal, and capture every objection.</p>
+      <div class="mt-5 rounded-[20px] border border-white/10 bg-black/10 px-4 py-4 text-white/90 text-sm">Outcome: a recorded, transcribed buyer conversation.</div>
+    </article>
+    <article class="panel p-6" data-aos="fade-left" data-aos-delay="240">
+      <div class="flex items-center gap-3">
+        <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Step 4</span>
+        <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+      </div>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Close and instrument</h3>
+      <p class="text-muted mt-4 text-sm leading-7">Convert engagement signals into a signed contract and pipe telemetry into expansion playbooks.</p>
+      <div class="mt-5 rounded-[20px] border border-white/10 bg-black/10 px-4 py-4 text-white/90 text-sm">Outcome: signed contract and telemetry feeding expansion plays.</div>
+    </article>
+  </div>
+</section>
+
+<!-- 6. SHOWCASE -->
+<section class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="text-center" data-aos="fade-up">
+    <span class="section-eyebrow">Use cases</span>
+    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-white font-display">Built for revenue teams who sell AI</h2>
+    <p class="mx-auto mt-4 max-w-2xl section-copy">Three playbooks that map directly to how BPO AI wins new business.</p>
+  </div>
+  <div class="mt-10 grid gap-4 lg:grid-cols-3">
+    <article class="panel h-full p-6" data-aos="fade-up" data-aos-delay="0">
+      <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Use case 1</span>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">BPO expansion</h3>
+      <p class="mt-4 text-sm leading-7 text-muted">Land new BPO contracts by demoing autonomous voice agents that replace 20+ human seats at a fraction of the cost.</p>
+      <div class="mt-6 flex flex-wrap gap-2">
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Voice QA</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Agent assist</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Outcome pricing</span>
+      </div>
+    </article>
+    <article class="panel h-full p-6" data-aos="fade-up" data-aos-delay="80">
+      <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Use case 2</span>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Enterprise RFPs</h3>
+      <p class="mt-4 text-sm leading-7 text-muted">Respond to enterprise RFPs with auto-generated proposals that include live voice agent demos and compliance documentation.</p>
+      <div class="mt-6 flex flex-wrap gap-2">
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Proposal automation</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Compliance</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Signature</span>
+      </div>
+    </article>
+    <article class="panel h-full p-6" data-aos="fade-up" data-aos-delay="160">
+      <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em]" style="color: var(--page-accent);">Use case 3</span>
+      <h3 class="mt-6 text-2xl font-semibold text-white font-display">Field pilots</h3>
+      <p class="mt-4 text-sm leading-7 text-muted">Run white-glove pilot deployments with telemetry baked in, then expand into full-fleet deals with proven ROI data.</p>
+      <div class="mt-6 flex flex-wrap gap-2">
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">White-glove onboarding</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Telemetry</span>
+        <span class="rounded-full border border-white/10 bg-black/10 px-3 py-2 text-xs font-medium text-muted">Expansion plays</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- 7. PRICING -->
+<section id="pricing" class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="text-center" data-aos="fade-up">
+    <span class="section-eyebrow">Pricing</span>
+    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-white font-display">Two engagements, one platform</h2>
+    <p class="mx-auto mt-4 max-w-2xl section-copy">Start with a single workspace pilot or go all-in with multi-agent orchestration and SLAs.</p>
+  </div>
+  <div class="mt-10 grid gap-4 lg:grid-cols-2">
+    <article class="panel relative p-6" data-aos="fade-up" data-aos-delay="0">
+      <span class="text-xs uppercase tracking-[0.22em] font-semibold" style="color: var(--page-accent);">Pilot</span>
+      <div class="mt-5 flex items-end gap-2">
+        <span class="text-5xl font-semibold text-white">$12k</span>
+        <span class="pb-2 text-sm text-muted">/ engagement</span>
+      </div>
+      <p class="mt-4 text-muted text-sm">One proposal workspace, one voice agent, full playbook.</p>
+      <ul class="mt-6 space-y-3 list-none p-0 m-0">
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Bespoke proposal workspace</li>
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Pipecat voice agent tuned to one flow</li>
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Ops dashboard + call transcripts</li>
+      </ul>
+      <a href="#cta" class="cta-button cta-button-primary mt-8 w-full">Start a pilot</a>
+    </article>
+    <article class="panel relative p-6" style="border-color: var(--page-primary-soft); background: linear-gradient(180deg, rgba(110,193,228,0.14), rgba(255,255,255,0.04));" data-aos="fade-up" data-aos-delay="80">
+      <div class="absolute top-4 right-4 rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] text-white font-semibold" style="background: var(--page-primary);">Recommended</div>
+      <span class="text-xs uppercase tracking-[0.22em] font-semibold" style="color: var(--page-accent);">Scale</span>
+      <div class="mt-5 flex items-end gap-2">
+        <span class="text-5xl font-semibold text-white">$48k</span>
+        <span class="pb-2 text-sm text-muted">/ quarter</span>
+      </div>
+      <p class="mt-4 text-muted text-sm">Unlimited proposals, multi-agent orchestration, SLAs.</p>
+      <ul class="mt-6 space-y-3 list-none p-0 m-0">
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Unlimited workspaces &amp; recipients</li>
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Multi-agent voice orchestration</li>
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Compliance, SSO, audit log</li>
+        <li class="flex items-center gap-3 text-white/90 text-sm"><i class="fa-solid fa-check" style="color: var(--page-primary);"></i>Dedicated success engineer</li>
+      </ul>
+      <a href="#cta" class="cta-button cta-button-primary mt-8 w-full">Book a scoping call</a>
+    </article>
+  </div>
+</section>
+
+<!-- 8. FAQ -->
+<section id="faq" class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+    <div data-aos="fade-up">
+      <span class="section-eyebrow">FAQ</span>
+      <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight text-white font-display">Answers before you ask</h2>
+      <p class="mt-4 section-copy">Common questions about the proposal workspace, voice widget, and deployment.</p>
+    </div>
+    <div class="space-y-4" data-aos="fade-up" data-aos-delay="100">
+      <details class="panel overflow-hidden p-0 group">
+        <summary class="cursor-pointer list-none px-6 py-5 text-lg font-semibold text-white">How do I swap the proposal document?</summary>
+        <div class="border-t border-white/10 px-6 py-5 text-sm leading-7 text-muted">Drop a Cloudinary raw upload URL in target-company.json; PDFs render in the iframe and Office docs fall back to the embedded viewer.</div>
+      </details>
+      <details class="panel overflow-hidden p-0 group">
+        <summary class="cursor-pointer list-none px-6 py-5 text-lg font-semibold text-white">Can I rebrand per account?</summary>
+        <div class="border-t border-white/10 px-6 py-5 text-sm leading-7 text-muted">Yes — the theme block accepts custom primary/accent and every section pulls colors from CSS variables.</div>
+      </details>
+      <details class="panel overflow-hidden p-0 group">
+        <summary class="cursor-pointer list-none px-6 py-5 text-lg font-semibold text-white">Does the voice widget work out of the box?</summary>
+        <div class="border-t border-white/10 px-6 py-5 text-sm leading-7 text-muted">The widget auto-opens 1.5 s after load and points at the demo assistant; replace the backend URL to connect your own Pipecat deployment.</div>
+      </details>
+      <details class="panel overflow-hidden p-0 group">
+        <summary class="cursor-pointer list-none px-6 py-5 text-lg font-semibold text-white">Is there a build step?</summary>
+        <div class="border-t border-white/10 px-6 py-5 text-sm leading-7 text-muted">None. Host the HTML anywhere — static, edge, or inside an existing app.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 9. CTA -->
+<section id="cta" class="section-shell py-16 sm:py-20 relative z-10">
+  <div class="panel relative overflow-hidden px-6 py-12 text-center sm:px-10">
+    <div class="absolute inset-x-1/4 top-[-6rem] h-40 rounded-full pointer-events-none" style="filter: blur(48px); background: radial-gradient(circle, rgba(110,193,228,0.30), transparent 70%);"></div>
+    <div class="relative">
+      <span class="section-eyebrow">Next step</span>
+      <h2 class="mx-auto mt-6 max-w-4xl text-3xl sm:text-5xl font-semibold text-white font-display">Ready to replace your proposal deck with a workspace that talks back?</h2>
+      <p class="section-copy mx-auto mt-5 max-w-2xl">Spin up a branded proposal surface, wire in a voice agent, and give every buyer their own review link.</p>
+      <div class="mt-7 flex flex-wrap justify-center gap-3">
+        <a href="mailto:sales@bpoai.com" class="cta-button cta-button-primary">Request a demo <i class="fa-solid fa-arrow-right ml-2"></i></a>
+        <a href="#hero" class="cta-button cta-button-secondary">Download the one-pager</a>
+      </div>
+      <p class="mx-auto mt-6 max-w-2xl text-sm leading-7 text-muted">Every template is self-hosted, JSON-driven, and shipped with the Pipecat widget bundled.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10. FOOTER -->
+<footer class="section-shell pb-10 pt-4 relative z-10">
+  <div class="flex flex-col gap-4 border-t border-white/10 py-6 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+    <span>This template uses a split-content model so sender branding, target-company data, shared page chrome, and Pipecat settings can all be managed independently.</span>
+    <span class="shrink-0">&copy; 2026 LYRIQ proposal workspace template.</span>
+  </div>
+</footer>
+
+<script>
+  AOS.init({ duration: 700, easing: 'cubic-bezier(0.16,1,0.3,1)', once: true });
+  lucide.createIcons();
+</script>
+<!--
+  Relaunch AI voice-widget embed.
+-->
+<div id="vw-bubble" aria-label="BPO AI AI assistant" style="position:fixed;inset:auto 20px 20px auto;width:380px;height:600px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35);z-index:2147483646;display:none;background:transparent">
+  <iframe src="https://widget-bpo-ai.vercel.app" allow="microphone; autoplay" style="width:100%;height:100%;border:0;display:block" title="BPO AI AI assistant"></iframe>
+</div>
+<button id="vw-toggle" type="button" aria-label="Open BPO AI AI assistant" style="position:fixed;inset:auto 20px 20px auto;display:flex;align-items:center;gap:10px;height:60px;padding:0 18px 0 14px;border-radius:30px;background:#6EC1E4;border:none;cursor:pointer;z-index:2147483647;box-shadow:0 10px 30px rgba(0,0,0,.4);color:#fff;font:600 14px/1 system-ui,-apple-system,sans-serif;transition:all .2s ease;white-space:nowrap;overflow:hidden">
+  <span class="vw-icon" style="font-size:22px;line-height:1">&#x1F4AC;</span>
+  <span class="vw-label" style="max-width:0;opacity:0;transition:all .2s ease;overflow:hidden">Talk to agent</span>
+  <span class="vw-close-glyph" style="display:none;font-size:18px;line-height:1">&times;</span>
+</button>
+<style>
+  #vw-toggle:hover .vw-label { max-width:160px !important; opacity:1 !important; margin-left:2px; }
+  #vw-toggle.is-open .vw-icon,
+  #vw-toggle.is-open .vw-label { display:none; }
+  #vw-toggle.is-open .vw-close-glyph { display:inline-block; }
+  #vw-toggle.is-open {
+    width:48px !important; height:48px !important; padding:0 !important;
+    justify-content:center; inset:auto 20px 640px auto !important; border-radius:50% !important;
+  }
+</style>
+<script>(function(){
+  var b=document.getElementById('vw-bubble'),t=document.getElementById('vw-toggle');
+  if(!b||!t)return;
+  function open(){
+    b.style.display='block';
+    t.classList.add('is-open');
+    t.setAttribute('aria-label','Close BPO AI AI assistant');
+  }
+  function close(){
+    b.style.display='none';
+    t.classList.remove('is-open');
+    t.setAttribute('aria-label','Open BPO AI AI assistant');
+    try{ sessionStorage.setItem('vw-closed-by-user','1'); }catch(_){}
+  }
+  t.addEventListener('click',function(){
+    t.classList.contains('is-open') ? close() : open();
+  });
+  window.addEventListener('message',function(e){
+    var d=e&&e.data;
+    if(d&&(d.type==='plumber-widget-minimize'||d.type==='vw-close')) close();
+  });
+  // Auto-open on each cold load unless the visitor explicitly closed it in this tab.
+  try{
+    if(sessionStorage.getItem('vw-closed-by-user')!=='1') setTimeout(open,800);
+  }catch(_){ setTimeout(open,800); }
+})();</script>
+</body>
+</html>
